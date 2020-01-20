@@ -6,8 +6,8 @@
 
 #include "lib\lib_Intf.au3"
 #include "lib\lib_cmds.au3"
-#include "intf\paint_Intf.au3" ; requires lib_intf.au3
-#include "intf\snip_Intf.au3"  ; requires lib_intf.au3
+#include "intf\paint_Intf.au3" ; requires lib_intf.au3 and lib_cmds.au3
+#include "intf\snip_Intf.au3"  ; requires lib_intf.au3 and lib_cmds.au3
 ;Opt("MustDeclareVars", 1)
 
 ; ver 1.2.0
@@ -20,7 +20,7 @@ Global $TBcnt = -1
 ; ************************ YOUR CODE GOES BELOW HERE *****************************
 
 ; 1920 x 1200
-Global $gBtnWidth  = 80          ; 24
+Global $gBtnWidth  = 60          ; 24
 Global $gBtnHeight = $gBtnWidth  ; Square
 
 ConsoleWrite("Width          =" & @DesktopWidth    & @CRLF)
@@ -34,23 +34,24 @@ Local $iOffset     = 100
 Local $iWidth      = ($gBtnWidth * 12) + ($gBtnWidth * 3) + 2
 Local $iTop        = 80
 Local $iLeft       = @DesktopWidth - ($iWidth + $iOffset)
-Local $h_ToolBar   = XSkinToolBarCreate("Float-ToolBar", $iLeft, $iTop, $iWidth)
 Local $dirSystem32 = @SystemDir & "\"
 Local $dirScript   = @ScriptDir & "\"
 Local $dirIco      = $dirScript & "ico\"
+Local $dirDest     = "C:\MyAu3\PaintMgr"
+ConsoleWrite("dirDest        =" & $dirDest     & @CRLF)
 ConsoleWrite("dirSystem32    =" & $dirSystem32 & @CRLF)
 ConsoleWrite("dirScript      =" & $dirScript   & @CRLF)
 ConsoleWrite("=====" & @CRLF)
+
+Local $h_ToolBar   = XSkinToolBarCreate("Float-ToolBar", $iLeft, $iTop, $iWidth)
 
 Local $exeFile01 = "notepad.exe"
 Local $TButton01 = XSkinToolBarButton("", $dirSystem32 & $exeFile01)
 
 ; #1 - Using Icons from a dll ( shell32.dll is default)
-Local $exeFile02 = "mspaint.exe"
-Local $TButton02 = XSkinToolBarButton("", $dirSystem32 & $exeFile02)
+Local $TButton02 = XSkinToolBarButton("", $dirSystem32 & $gPaintExecutable)
 
-Local $exeFile03 = "snippingtool.exe"
-Local $TButton03 = XSkinToolBarButton("", $dirSystem32 & $exeFile03)
+Local $TButton03 = XSkinToolBarButton("", $dirSystem32 & $gSnipExecutable)
 
 Local $exeFile04 = "calc.exe"
 Local $TButton04 = XSkinToolBarButton("", $dirSystem32 & $exeFile04)
@@ -94,29 +95,29 @@ While 1
     $msg = GUIGetMsg()
 
     if $msg = $TButton01 Then
-		Run($exeFile01)           ; Open notepad
+		Run($exeFile01)              ; Open notepad
     ElseIf $msg = $TButton02 Then
-		Run($exeFile02)           ; Open mspain
+		Run($gPaintExecutable)       ; Open mspaint
     ElseIf $msg = $TButton03 Then
 		_WinAPI_Wow64EnableWow64FsRedirection(False)
-		Run($exeFile03)           ; Open snip
+		Run($gSnipExecutable)        ; Open snip
 		_WinAPI_Wow64EnableWow64FsRedirection(True)
     ElseIf $msg = $TButton04 Then
-		Run($exeFile04)           ; Open calc
+		Run($exeFile04)              ; Open calc
     ElseIf $msg = $TButton05 Then
-		buffer_clear()            ; One, buffer clear
+		buffer_clear()               ; One, buffer clear
     ElseIf $msg = $TButton06 Then
-		buffer_print_screen()     ; Two, buffer: insert entire screen
+		buffer_print_screen()        ; Two, buffer: insert entire screen
     ElseIf $msg = $TButton07 Then
-		buffer_alt_print_screen() ; Three
+		buffer_alt_print_screen()    ; Three
     ElseIf $msg = $TButton08 Then
-		buffer_check() ; Four
+		buffer_check()               ; Four
     ElseIf $msg = $TButton09 Then
-		buffer_check() ; Five
+		buffer_check()               ; Five
     ElseIf $msg = $TButton10 Then
-		buffer_to_snip_and_save()    ; Six,   copy clipboard to snip  and setup save
+		buffer_to_snip_and_save($dirDest)    ; Six,   copy clipboard to snip  and setup save
     ElseIf $msg = $TButton11 Then
-		buffer_to_mspaint_and_save() ; Seven, copy clipboard to paint and setup save
+		buffer_to_mspaint_and_save($dirDest) ; Seven, copy clipboard to paint and setup save
     ElseIf $msg = $TButtonLast Then
 		Exit
 	EndIf
@@ -124,10 +125,9 @@ WEnd
 
 ; ************************ YOUR CODE ENDS HERE *****************************
 
-Func buffer_to_snip_and_save()
+Func buffer_to_snip_and_save($aDestDir)
 	Local $iReturn = 0;
 	; This toolbar has the focus
-	Local $dir      = "C:\MyAu3\PaintMgr"
 	Local $fileName = ""
 	ConsoleWrite("+++++" & @CRLF)
 
@@ -139,7 +139,7 @@ Func buffer_to_snip_and_save()
 	EndIf
 
 	; Yes, initialize to get a filename with a unique timestamp
-	If snip_init("SNIP", $dir, $fileName) == False Then
+	If snip_init("SNIP", $aDestDir, $fileName) == False Then
 		ConsoleWrite("Error, Unable to build filename" & @CRLF)
 		$iReturn = 1;
 		return $iReturn
@@ -150,20 +150,20 @@ Func buffer_to_snip_and_save()
 	ConsoleWrite("is_app_running=" & $status & @CRLF)
 	If $status == False Then
 		ConsoleWrite("Error, Snip is not running"  & @CRLF)
-		$iReturn = 1;
+		$iReturn = 2;
 		return $iReturn
 	EndIf
 
 	; Yes, Focus to mspaint
 	If set_app_focuse($gSnipDialog1_title) == False Then
 		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
-		$iReturn = 1;
+		$iReturn = 3;
 		return $iReturn
 	EndIf
 
 	; Main function
-	If copy_buffer_to_snip($dir, $fileName, True) == True Then
-		$iReturn = 1;
+	If copy_buffer_to_snip($aDestDir, $fileName, True) == False Then
+		$iReturn = 4;
 		return $iReturn
 	EndIf
 
@@ -171,10 +171,9 @@ Func buffer_to_snip_and_save()
 	return $iReturn
 EndFunc
 
-Func buffer_to_mspaint_and_save()
+Func buffer_to_mspaint_and_save($aDestDir)
 	Local $iReturn = 0;
 	; This toolbar has the focus
-	Local $dir      = "C:\MyAu3\PaintMgr"
 	Local $fileName = ""
 	ConsoleWrite("+++++" & @CRLF)
 
@@ -186,9 +185,9 @@ Func buffer_to_mspaint_and_save()
 	EndIf
 
 	; Yes, initialize to get a filename with a unique timestamp
-	If paint_init("PAINT", $dir, $fileName) == False Then
+	If paint_init("PAINT", $aDestDir, $fileName) == False Then
 		ConsoleWrite("Error, Unable to build filename" & @CRLF)
-		$iReturn = 1;
+		$iReturn = 2;
 		return $iReturn
 	EndIf
 
@@ -197,20 +196,20 @@ Func buffer_to_mspaint_and_save()
 	ConsoleWrite("is_app_running=" & $status & @CRLF)
 	If $status == False Then
 		ConsoleWrite("Error, Paint is not running"  & @CRLF)
-		$iReturn = 1;
+		$iReturn = 3;
 		return $iReturn
 	EndIf
 
 	; Yes, Focus to mspaint
 	If set_app_focuse($gDialog1_title) == False Then
 		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
-		$iReturn = 1;
+		$iReturn = 4;
 		return $iReturn
 	EndIf
 
 	; Main function
-	If copy_buffer_to_paint($dir, $fileName, True) == True Then
-		$iReturn = 1;
+	If copy_buffer_to_paint($aDestDir, $fileName, True) == False Then
+		$iReturn = 5;
 		return $iReturn
 	EndIf
 
@@ -317,27 +316,26 @@ Func XSkinToolBarCreate($XTitle, $tool_left, $tool_top, $tool_width, $tool_bkcol
 EndFunc   ;==>XSkinToolBarCreate
 
 Func XSkinToolBarButton($iNumber, $aDllExeIco = "shell32.dll")
-    $TBcnt         = $TBcnt + 1
+    $TBcnt          = $TBcnt + 1
 	Local $iconSize = 1 ; 0=small, 1=normal
-    Local $TBBleft = $TBcnt * $gBtnWidth
-    Local $Xhadd   = GUICtrlCreateButton("", $TBBleft, 1, $gBtnWidth, $gBtnHeight, $BS_ICON)
+    Local $TBBleft  = $TBcnt * $gBtnWidth
+    Local $Xhadd    = GUICtrlCreateButton("", $TBBleft, 1, $gBtnWidth, $gBtnHeight, $BS_ICON)
     GUICtrlSetImage($Xhadd, $aDllExeIco, $iNumber, $iconSize)
     Return $Xhadd
 EndFunc   ;==>XSkinToolBarButton
 
 Func XSkinToolBarButton2($iNumber, $aDllExeIco = "shell32.dll")
-    $TBcnt         = $TBcnt + 1
+    $TBcnt          = $TBcnt + 1
 	Local $iconSize = 1 ; 0=small, 1=normal
-    Local $TBBleft = $TBcnt * $gBtnWidth
+    Local $TBBleft  = $TBcnt * $gBtnWidth
 	_WinAPI_Wow64EnableWow64FsRedirection(False)
-    Local $Xhadd   = GUICtrlCreateButton("", $TBBleft, 1, $gBtnWidth, $gBtnHeight, $BS_ICON)
+    Local $Xhadd    = GUICtrlCreateButton("", $TBBleft, 1, $gBtnWidth, $gBtnHeight, $BS_ICON)
     GUICtrlSetImage($Xhadd, $aDllExeIco, $iNumber, $iconSize)
 	_WinAPI_Wow64EnableWow64FsRedirection(True)
     Return $Xhadd
 EndFunc   ;==>XSkinToolBarButton
 
 Func XSkinToolBarSeparator()
-    ;$TBcnt         = $TBcnt + .5
 	$TBcnt          = $TBcnt + 1
     Local $TBBleft  = $TBcnt * $gBtnWidth
 	Local $barWidth = $gBtnWidth / 2
