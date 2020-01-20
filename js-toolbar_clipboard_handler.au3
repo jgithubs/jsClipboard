@@ -31,13 +31,13 @@ ConsoleWrite("SystemDir      =" & @SystemDir       & @CRLF)
 ConsoleWrite("ProgramFilesDir=" & @ProgramFilesDir & @CRLF)
 
 Local $iOffset     = 100
-Local $iWidth      = ($gBtnWidth * 12) + ($gBtnWidth * 3) + 2
+Local $iWidth      = ($gBtnWidth * 14) + ($gBtnWidth * 4) + 2
 Local $iTop        = 80
 Local $iLeft       = @DesktopWidth - ($iWidth + $iOffset)
 Local $dirSystem32 = @SystemDir & "\"
 Local $dirScript   = @ScriptDir & "\"
 Local $dirIco      = $dirScript & "ico\"
-Local $dirDest     = "C:\MyAu3\PaintMgr"
+Local $dirDest     = "C:\MyTemp\PaintMgr"
 ConsoleWrite("dirDest        =" & $dirDest     & @CRLF)
 ConsoleWrite("dirSystem32    =" & $dirSystem32 & @CRLF)
 ConsoleWrite("dirScript      =" & $dirScript   & @CRLF)
@@ -45,40 +45,46 @@ ConsoleWrite("=====" & @CRLF)
 
 Local $h_ToolBar   = XSkinToolBarCreate("Float-ToolBar", $iLeft, $iTop, $iWidth)
 
-Local $exeFile01 = "notepad.exe"
-Local $TButton01 = XSkinToolBarButton("", $dirSystem32 & $exeFile01)
 
-; #1 - Using Icons from a dll ( shell32.dll is default)
-Local $TButton02 = XSkinToolBarButton("", $dirSystem32 & $gPaintExecutable)
+Local $TButton01 = XSkinToolBarButton("", $dirIco & "\one.ico")
 
-Local $TButton03 = XSkinToolBarButton("", $dirSystem32 & $gSnipExecutable)
+Local $TButton02 = XSkinToolBarButton("", $dirIco & "\two.ico")
 
-Local $exeFile04 = "calc.exe"
-Local $TButton04 = XSkinToolBarButton("", $dirSystem32 & $exeFile04)
+Local $TButton03 = XSkinToolBarButton("", $dirIco & "\three.ico")
+
+Local $TButton04 = XSkinToolBarButton("", $dirIco & "\four.ico")
 
 ; Seperator
 XSkinToolBarSeparator()
 GUICtrlSetTip( -1, "Drag Me")
 
-; #2 - Using Icons from an exe file
-Local $TButton05 = XSkinToolBarButton("", $dirIco & "\one.ico")
+Local $gNotepadExecutable = "notepad.exe"
+Local $TButton05 = XSkinToolBarButton("", $dirSystem32 & $gNotepadExecutable)
 
-Local $TButton06 = XSkinToolBarButton("", $dirIco & "\two.ico")
+Local $TButton06 = XSkinToolBarButton("", $dirIco & "\five.ico")
 
-Local $TButton07 = XSkinToolBarButton("", $dirIco & "\three.ico")
+Local $TButton07 = XSkinToolBarButton("", $dirIco & "\six.ico")
 
-Local $TButton08 = XSkinToolBarButton("", $dirIco & "\four.ico")
+; Seperator
+XSkinToolBarSeparator()
+GUICtrlSetTip( -1, "Drag Me")
+
+Local $TButton08 = XSkinToolBarButton("", $dirSystem32 & $gPaintExecutable)
+
+Local $TButton09 = XSkinToolBarButton("", $dirIco & "\seven.ico")
+
+Local $TButton10 = XSkinToolBarButton("", $dirIco & "\eight.ico")
 
 ; Seperator
 XSkinToolBarSeparator()
 GUICtrlSetTip( -1, "Drag Me")
 
 ; #3 - Using Icons from an ico file
-Local $TButton09 = XSkinToolBarButton("", $dirIco & "\five.ico")
+Local $TButton11 = XSkinToolBarButton("", $dirSystem32 & $gSnipExecutable)
 
-Local $TButton10 = XSkinToolBarButton("", $dirIco & "\six.ico")
+Local $TButton12 = XSkinToolBarButton("", $dirIco & "\nine.ico")
 
-Local $TButton11 = XSkinToolBarButton("", $dirIco & "\seven.ico")
+Local $TButton13 = XSkinToolBarButton("", $dirIco & "\zero.ico")
 
 ; Seperator
 XSkinToolBarSeparator()
@@ -94,31 +100,38 @@ WinSetOnTop($h_ToolBar, "", 1)
 While 1
     $msg = GUIGetMsg()
 
-    if $msg = $TButton01 Then
-		Run($exeFile01)              ; Open notepad
+	If $msg = $TButton01 Then
+		buffer_clear()                       ; One, buffer clear
     ElseIf $msg = $TButton02 Then
-		Run($gPaintExecutable)       ; Open mspaint
+		buffer_check()                       ; One, buffer clear
     ElseIf $msg = $TButton03 Then
-		_WinAPI_Wow64EnableWow64FsRedirection(False)
-		Run($gSnipExecutable)        ; Open snip
-		_WinAPI_Wow64EnableWow64FsRedirection(True)
+		buffer_print_screen()                ; Notepad
     ElseIf $msg = $TButton04 Then
-		Run($exeFile04)              ; Open calc
-    ElseIf $msg = $TButton05 Then
-		buffer_clear()               ; One, buffer clear
+		buffer_alt_print_screen()            ; Two
+
+	Elseif $msg = $TButton05 Then
+		Run($gNotepadExecutable)             ; Three
     ElseIf $msg = $TButton06 Then
-		buffer_print_screen()        ; Two, buffer: insert entire screen
+		buffer_check()                       ; Notepad
     ElseIf $msg = $TButton07 Then
-		buffer_alt_print_screen()    ; Three
-    ElseIf $msg = $TButton08 Then
-		buffer_check()               ; Four
-    ElseIf $msg = $TButton09 Then
-		buffer_check()               ; Five
-    ElseIf $msg = $TButton10 Then
-		buffer_to_snip_and_save($dirDest)    ; Six,   copy clipboard to snip  and setup save
-    ElseIf $msg = $TButton11 Then
-		buffer_to_mspaint_and_save($dirDest) ; Seven, copy clipboard to paint and setup save
-    ElseIf $msg = $TButtonLast Then
+		buffer_alt_print_screen()            ; Two
+
+	ElseIf $msg = $TButton08 Then
+		Run($gPaintExecutable)               ; Open mspaint
+	ElseIf $msg = $TButton09 Then
+		buffer_check()                       ; Four
+	ElseIf $msg = $TButton10 Then
+		buffer_to_mspaint_and_save($dirDest) ; Five
+
+	ElseIf $msg = $TButton11 Then
+		_WinAPI_Wow64EnableWow64FsRedirection(False)
+		Run($gSnipExecutable)                ; Open snip
+		_WinAPI_Wow64EnableWow64FsRedirection(True)
+    ElseIf $msg = $TButton12 Then
+		buffer_check()                       ; Six
+    ElseIf $msg = $TButton13 Then
+		buffer_to_snip_and_save($dirDest)    ; Seven
+    ElseIf $msg = $TButtonLast Then          ; 12
 		Exit
 	EndIf
 WEnd

@@ -32,6 +32,8 @@ Func snip_init($aPrefix, $aPath, ByRef $aFilename)
 	if dir_exists($aPath) == True Then
 		$bReturn = True;
 		ConsoleWrite("path      ;" & $aPath & ";" & dir_exists($aPath) & @CRLF)
+	Else
+		ConsoleWrite("Error, aPath does not exists.")
 	EndIf
 
 	Return $bReturn
