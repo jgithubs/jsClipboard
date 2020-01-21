@@ -6,8 +6,9 @@
 
 #include "lib\lib_Intf.au3"
 #include "lib\lib_cmds.au3"
-#include "intf\paint_Intf.au3" ; requires lib_intf.au3 and lib_cmds.au3
-#include "intf\snip_Intf.au3"  ; requires lib_intf.au3 and lib_cmds.au3
+#include "intf\paint_Intf.au3"   ; requires lib_intf.au3 and lib_cmds.au3
+#include "intf\snip_Intf.au3"    ; requires lib_intf.au3 and lib_cmds.au3
+#include "intf\notepad_Intf.au3" ; requires lib_intf.au3 and lib_cmds.au3
 ;Opt("MustDeclareVars", 1)
 
 ; ver 1.2.0
@@ -43,7 +44,7 @@ ConsoleWrite("dirSystem32    =" & $dirSystem32 & @CRLF)
 ConsoleWrite("dirScript      =" & $dirScript   & @CRLF)
 ConsoleWrite("=====" & @CRLF)
 
-Local $h_ToolBar   = XSkinToolBarCreate("Float-ToolBar", $iLeft, $iTop, $iWidth)
+Local $h_ToolBar = XSkinToolBarCreate("Float-ToolBar", $iLeft, $iTop, $iWidth)
 
 
 Local $TButton01 = XSkinToolBarButton("", $dirIco & "\one.ico")
@@ -54,16 +55,17 @@ Local $TButton03 = XSkinToolBarButton("", $dirIco & "\three.ico")
 
 Local $TButton04 = XSkinToolBarButton("", $dirIco & "\four.ico")
 
+
 ; Seperator
 XSkinToolBarSeparator()
 GUICtrlSetTip( -1, "Drag Me")
 
-Local $gNotepadExecutable = "notepad.exe"
 Local $TButton05 = XSkinToolBarButton("", $dirSystem32 & $gNotepadExecutable)
 
 Local $TButton06 = XSkinToolBarButton("", $dirIco & "\five.ico")
 
-Local $TButton07 = XSkinToolBarButton("", $dirIco & "\six.ico")
+Local $TButton07 = XSkinToolBarButton("", $dirIco & "\save.ico")
+
 
 ; Seperator
 XSkinToolBarSeparator()
@@ -71,9 +73,10 @@ GUICtrlSetTip( -1, "Drag Me")
 
 Local $TButton08 = XSkinToolBarButton("", $dirSystem32 & $gPaintExecutable)
 
-Local $TButton09 = XSkinToolBarButton("", $dirIco & "\seven.ico")
+Local $TButton09 = XSkinToolBarButton("", $dirIco & "\six.ico")
 
-Local $TButton10 = XSkinToolBarButton("", $dirIco & "\eight.ico")
+Local $TButton10 = XSkinToolBarButton("", $dirIco & "\save.ico")
+
 
 ; Seperator
 XSkinToolBarSeparator()
@@ -82,9 +85,9 @@ GUICtrlSetTip( -1, "Drag Me")
 ; #3 - Using Icons from an ico file
 Local $TButton11 = XSkinToolBarButton("", $dirSystem32 & $gSnipExecutable)
 
-Local $TButton12 = XSkinToolBarButton("", $dirIco & "\nine.ico")
+Local $TButton12 = XSkinToolBarButton("", $dirIco & "\seven.ico")
 
-Local $TButton13 = XSkinToolBarButton("", $dirIco & "\zero.ico")
+Local $TButton13 = XSkinToolBarButton("", $dirIco & "\save.ico")
 
 ; Seperator
 XSkinToolBarSeparator()
@@ -101,42 +104,67 @@ While 1
     $msg = GUIGetMsg()
 
 	If $msg = $TButton01 Then
-		buffer_clear()                       ; One, buffer clear
+		buffer_clear()                       ; One
     ElseIf $msg = $TButton02 Then
-		buffer_check()                       ; One, buffer clear
+		buffer_check()                       ; Two
     ElseIf $msg = $TButton03 Then
-		buffer_print_screen()                ; Notepad
+		buffer_print_screen()                ; Three
     ElseIf $msg = $TButton04 Then
-		buffer_alt_print_screen()            ; Two
+		buffer_alt_print_screen()            ; Four
 
 	Elseif $msg = $TButton05 Then
-		Run($gNotepadExecutable)             ; Three
+		Run($gNotepadExecutable)                 ; Open Notepad
     ElseIf $msg = $TButton06 Then
-		buffer_check()                       ; Notepad
+		appinfo_save_pos($gNotepadDialog1_class, $gNotepadX, $gNotepadY, $gNotepadW, $gNotepadH) ; Five, Position
     ElseIf $msg = $TButton07 Then
-		buffer_alt_print_screen()            ; Two
+		buffer_check()                          ; Five
 
 	ElseIf $msg = $TButton08 Then
-		Run($gPaintExecutable)               ; Open mspaint
+		Run($gPaintExecutable)                   ; Open mspaint
 	ElseIf $msg = $TButton09 Then
-		buffer_check()                       ; Four
+		appinfo_save_pos($gNotepadDialog1_class, $gNotepadX, $gNotepadY, $gNotepadW, $gNotepadH) ; Seven, Position
 	ElseIf $msg = $TButton10 Then
-		buffer_to_mspaint_and_save($dirDest) ; Five
+		buffer_to_mspaint_and_save($dirDest)     ; Six
 
 	ElseIf $msg = $TButton11 Then
 		_WinAPI_Wow64EnableWow64FsRedirection(False)
-		Run($gSnipExecutable)                ; Open snip
+		Run($gSnipExecutable)                    ; Open snip
 		_WinAPI_Wow64EnableWow64FsRedirection(True)
     ElseIf $msg = $TButton12 Then
-		buffer_check()                       ; Six
+		buffer_check()                           ; Seven
     ElseIf $msg = $TButton13 Then
-		buffer_to_snip_and_save($dirDest)    ; Seven
-    ElseIf $msg = $TButtonLast Then          ; 12
+		buffer_to_snip_and_save($dirDest)        ; Info snip
+    ElseIf $msg = $TButtonLast Then
 		Exit
 	EndIf
 WEnd
 
 ; ************************ YOUR CODE ENDS HERE *****************************
+
+Func appinfo_save_pos($aClass, ByRef $aX, ByRef $aY, ByRef $aH, ByRef $aW)
+
+	; Is mspaint is running?
+	Local $status = is_app_running($gNotepadDialog1_class)
+	ConsoleWrite("is_app_running=" & $status & @CRLF)
+	If $status == False Then
+		ConsoleWrite("Error, Snip is not running"  & @CRLF)
+		$iReturn = 2;
+		return $iReturn
+	EndIf
+
+    ; Retrieve the position as well as height and width of the active window.
+    Local $winPos = WinGetPos($gNotepadDialog1_class)
+	If @error == 0 Then
+		$aX = $winPos[0]
+		$aY = $winPos[1]
+		$aW = $winPos[2]
+		$aH = $winPos[3]
+		ConsoleWrite("X=" & $aX & @CRLF)
+		ConsoleWrite("Y=" & $aY & @CRLF)
+		ConsoleWrite("W=" & $aW & @CRLF)
+		ConsoleWrite("H=" & $aH & @CRLF)
+	EndIf
+EndFunc
 
 Func buffer_to_snip_and_save($aDestDir)
 	Local $iReturn = 0;
@@ -205,7 +233,7 @@ Func buffer_to_mspaint_and_save($aDestDir)
 	EndIf
 
 	; Is mspaint is running?
-	Local $status = is_app_running($gDialog1_title)
+	Local $status = is_app_running($gPaintDialog1_class)
 	ConsoleWrite("is_app_running=" & $status & @CRLF)
 	If $status == False Then
 		ConsoleWrite("Error, Paint is not running"  & @CRLF)
@@ -214,7 +242,7 @@ Func buffer_to_mspaint_and_save($aDestDir)
 	EndIf
 
 	; Yes, Focus to mspaint
-	If set_app_focuse($gDialog1_title) == False Then
+	If set_app_focuse($gPaintDialog1_class) == False Then
 		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
 		$iReturn = 4;
 		return $iReturn
@@ -319,6 +347,8 @@ Func buffer_clear()
 	ConsoleWrite("Clipboard cleared" & @CRLF)
 	Return $bReturn
 EndFunc
+
+
 
 ; ************************ YOUR CODE ENDS HERE *****************************
 

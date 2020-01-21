@@ -3,12 +3,17 @@
 Global $gPaintExecutable    = "mspaint.exe"
 
 ; Dialog 1
-Global $gDialog1_title      = "Untitled - Paint"
+Global $gPaintDialog1_title = "Untitled - Paint"
+Global $gPaintDialog1_class = "[CLASS:MSPaintApp]"
+Global $gPaintX             = -1
+Global $gPaintY             = -1
+Global $gPaintW             = -1
+Global $gPaintH             = -1
 
 ; Dialog 2
-Global $gDialog2_title      = "Save As"
-Global $gDialog2_cntrl_Path = "ToolbarWindow324"
-Global $gDialog2_cntrl_File = "Edit1"
+Global $gPaintDialog2_title      = "Save As"
+Global $gPaintDialog2_cntrl_Path = "ToolbarWindow324"
+Global $gPaintDialog2_cntrl_File = "Edit1"
 
 Func paint_init($aPrefix, $aPath, ByRef $aFilename)
 	Local $bReturn = False
@@ -44,15 +49,15 @@ Func copy_buffer_to_paint($aPath, $aFilename, $aSaveFlag = False)
 	If $aSaveFlag == True Then
 		; Invoke a save
 		Send($gCmdSave)
-		WinWaitActive($gDialog2_title)
+		WinWaitActive($gPaintDialog1_class)
 
 		; Set the path
-		ControlFocus($gDialog2_title, "", $gDialog2_cntrl_Path)
-		ControlSend ($gDialog2_title, "", $gDialog2_cntrl_Path,     $aPath)
+		ControlFocus($gPaintDialog2_title, "", $gPaintDialog2_cntrl_Path)
+		ControlSend ($gPaintDialog2_title, "", $gPaintDialog2_cntrl_Path,     $aPath)
 
 		; Set the filename
-		ControlFocus($gDialog2_title, "", $gDialog2_cntrl_File)
-		ControlSend ($gDialog2_title, "", $gDialog2_cntrl_File, $aFilename)
+		ControlFocus($gPaintDialog1_class, "", $gPaintDialog2_cntrl_File)
+		ControlSend ($gPaintDialog1_class, "", $gPaintDialog2_cntrl_File, $aFilename)
 
 	EndIf
 EndFunc

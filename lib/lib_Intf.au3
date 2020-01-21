@@ -1,24 +1,24 @@
 #include "Date.au3"
 
-Func is_app_running($aTitle)
+Func is_app_running($aTitleClassHandle)
 	Local $bReturn = False
-	If WinExists($aTitle) == 1 Then
+	If WinExists($aTitleClassHandle) == 1 Then
 		$bReturn = True
 	EndIf
 	Return $bReturn
 EndFunc
 
-Func is_app_focused($aTitle)
+Func is_app_focused($aTitleClassHandle)
 	Local $bReturn = False
-	If WinActive($aTitle) <> 0 Then
+	If WinActive($aTitleClassHandle) <> 0 Then
 		$bReturn = True
 	EndIf
 	Return $bReturn
 EndFunc
 
-Func set_app_focuse($aTitle)
+Func set_app_focuse($aTitleClassHandle)
 	Local $bReturn = False
-	If WinActivate($aTitle) <> 0 Then
+	If WinActivate($aTitleClassHandle) <> 0 Then
 		$bReturn = True
 	EndIf
 	Return $bReturn

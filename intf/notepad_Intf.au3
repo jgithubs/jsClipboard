@@ -1,21 +1,21 @@
 ; Caller shall include "lib_Intf.aue" before including this file
 ; Snip Information
-Global $gSnipExecutable         = "snippingtool.exe"
+Global $gNotepadExecutable         = "notepad.exe"
 
 ; Dialog 1
-Global $gSnipDialog1_title      = "Snipping Tool"
-Global $gSnipDialog1_class      = "[CLASS:Microsoft-Windows-SnipperToolbar]"
-Global $gSnipX                  = -1
-Global $gSnipY                  = -1
-Global $gSnipW                  = -1
-Global $gSnipH                  = -1
+Global $gNotepadDialog1_title      = "Untitled - Notepad"
+Global $gNotepadDialog1_class      = "[CLASS:Notepad]"
+Global $gNotepadX                  = -1
+Global $gNotepadY                  = -1
+Global $gNotepadW                  = -1
+Global $gNotepadH                  = -1
 
 ; Dialog 2
-Global $gSnipDialog2_title      = "Save As"
-Global $gSnipDialog2_cntrl_Path = "ToolbarWindow324"
-Global $gSnipDialog2_cntrl_File = "Edit1"
+Global $gNotepadDialog2_title      = "Save As"
+Global $gNotepadDialog2_cntrl_Path = "ToolbarWindow324"
+Global $gNotepadDialog2_cntrl_File = "Edit1"
 
-Func snip_init($aPrefix, $aPath, ByRef $aFilename)
+Func notepad_init($aPrefix, $aPath, ByRef $aFilename)
 	Local $bReturn = False
 
 	; filename, part 1
@@ -43,7 +43,7 @@ Func snip_init($aPrefix, $aPath, ByRef $aFilename)
 	Return $bReturn
 EndFunc
 
-Func copy_buffer_to_snip($aPath, $aFilename, $aSaveFlag = False)
+Func copy_buffer_to_notepad($aPath, $aFilename, $aSaveFlag = False)
 	; Insert Image from buffer
 	;Send($gCmdPaste)
 	;Send($gCmdEsc)
