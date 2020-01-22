@@ -3,8 +3,9 @@
 Global $gPaintExecutable    = "mspaint.exe"
 
 ; Dialog 1
-Global $gPaintDialog1_title = "Untitled - Paint"
 Global $gPaintDialog1_class = "[CLASS:MSPaintApp]"
+
+Global $gPaintDialog1_title = "Untitled - Paint"
 Global $gPaintX             = -1
 Global $gPaintY             = -1
 Global $gPaintW             = -1
@@ -16,6 +17,8 @@ Global $gPaintDialog2_cntrl_Path = "ToolbarWindow324"
 Global $gPaintDialog2_cntrl_File = "Edit1"
 
 Func paint_init($aPrefix, $aPath, ByRef $aFilename)
+	Local $funcName = "paint_init"
+	ConsoleWrite("+++++ " & $funcName & @CRLF)
 	Local $bReturn = False
 
 	; filename, part 1
@@ -30,7 +33,7 @@ Func paint_init($aPrefix, $aPath, ByRef $aFilename)
 
 	; filename
 	$aFilename = $timeStamp & "-" & $aPrefix & $fileSuffix
-	ConsoleWrite("aFilename ; " & $aFilename & @CRLF)
+	ConsoleWrite("aFilename ;" & $aFilename & @CRLF)
 
 	; filepath
 	if dir_exists($aPath) == True Then
@@ -38,10 +41,17 @@ Func paint_init($aPrefix, $aPath, ByRef $aFilename)
 		ConsoleWrite("path      ;" & $aPath & ";" & dir_exists($aPath) & @CRLF)
 	EndIf
 
+	ConsoleWrite("----- " & $funcName & @CRLF)
 	Return $bReturn
 EndFunc
 
 Func copy_buffer_to_paint($aPath, $aFilename, $aSaveFlag = False)
+	Local $funcName = "copy_buffer_to_paint"
+	ConsoleWrite("+++++ " & $funcName & @CRLF)
+	ConsoleWrite("aPath     ;" & $aPath     & @CRLF)
+	ConsoleWrite("aFilename ;" & $aFilename & @CRLF)
+	ConsoleWrite("aSaveFlag ;" & $aSaveFlag & @CRLF)
+
 	; Insert Image from buffer
 	Send($gCmdPaste)
 	Send($gCmdEsc)
@@ -49,15 +59,22 @@ Func copy_buffer_to_paint($aPath, $aFilename, $aSaveFlag = False)
 	If $aSaveFlag == True Then
 		; Invoke a save
 		Send($gCmdSave)
-		WinWaitActive($gPaintDialog1_class)
 
-		; Set the path
-		ControlFocus($gPaintDialog2_title, "", $gPaintDialog2_cntrl_Path)
-		ControlSend ($gPaintDialog2_title, "", $gPaintDialog2_cntrl_Path,     $aPath)
+		ConsoleWrite("Waiting" & $gPaintDialog2_title & @CRLF)
+		Local $hWnd1 = WinWaitActive($gPaintDialog2_title)
+		ConsoleWrite("hWnd1=" & $hWnd1 & $gPaintDialog2_title & @CRLF)
+		If $hWnd1 <> 0 Then
+			; Set the path
+			ControlFocus($gPaintDialog2_title, "", $gPaintDialog2_cntrl_Path)
+			ControlSend ($gPaintDialog2_title, "", $gPaintDialog2_cntrl_Path,     $aPath)
 
-		; Set the filename
-		ControlFocus($gPaintDialog1_class, "", $gPaintDialog2_cntrl_File)
-		ControlSend ($gPaintDialog1_class, "", $gPaintDialog2_cntrl_File, $aFilename)
+			; Set the filename
+			ControlFocus($gPaintDialog2_title, "", $gPaintDialog2_cntrl_File)
+			ControlSend ($gPaintDialog2_title, "", $gPaintDialog2_cntrl_File, $aFilename)
+		Else
+			ConsoleWrite("Timeout" & @CRLF)
+		EndIf
 
 	EndIf
+	ConsoleWrite("+++++ " & $funcName & @CRLF)
 EndFunc

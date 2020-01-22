@@ -3,8 +3,8 @@
 Global $gNotepadExecutable         = "notepad.exe"
 
 ; Dialog 1
-Global $gNotepadDialog1_title      = "Untitled - Notepad"
 Global $gNotepadDialog1_class      = "[CLASS:Notepad]"
+Global $gNotepadDialog1_title      = "Untitled - Notepad"
 Global $gNotepadX                  = -1
 Global $gNotepadY                  = -1
 Global $gNotepadW                  = -1

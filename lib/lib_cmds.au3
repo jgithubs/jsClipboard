@@ -1,5 +1,5 @@
 
-; Keystrok Commands
+; Keystroke Commands
 Global $gCmdScrPrint    = "{PRINTSCREEN}"
 Global $gCmdScrPrintAlt = "!{PRINTSCREEN}"
 

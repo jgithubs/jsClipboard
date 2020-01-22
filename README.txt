@@ -26,7 +26,7 @@ git pull
 
 Testing Updates
 - Enable a horizontal or vertical tool bar
-- Control location of snip app
+- Control location of apps
   - minimize app after save
 - Added notepad to capture notes
   - ability to clear the notepad
@@ -37,6 +37,7 @@ Testing Updates
 - Update md file
 - Add tooltip
 - Software signing
+- Keystroke to min apps
 
 
 
