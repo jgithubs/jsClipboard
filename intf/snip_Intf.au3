@@ -1,15 +1,19 @@
 ; Caller shall include "lib_Intf.au3" before including this file.
 ; Caller shall include "lib_cmds.au3" before including this file.
 ; Snip Information
-Global $gSnipExecutable         = "snippingtool.exe"
-Global $gSnipDialog1_class      = "[CLASS:Microsoft-Windows-SnipperToolbar]"
-Global $gSnipX                  = -1
-Global $gSnipY                  = -1
-Global $gSnipW                  = -1
-Global $gSnipH                  = -1
+Global $gSnipStruct[10][2] = [ _
+    ["Exe  ", "snippingtool.exe"],        _
+	["Redir", True],                _
+	["Class", "[CLASS:Microsoft-Windows-SnipperToolbar]"], _
+	["Title", "Snipping Tool"],   _
+	["Pid  ", -1], _
+	["hWnd ", -1], _
+	["X    ", -1], _
+	["Y    ", -1], _
+	["W    ", -1], _
+	["H    ", -1]  _
+   ]
 
-; Dialog 1
-Global $gSnipDialog1_title      = "Snipping Tool"
 
 ; Dialog 2
 Global $gSnipDialog2_title      = "Save As"
@@ -60,8 +64,8 @@ Func copy_buffer_to_snip($aPath, $aFilename, $aSaveFlag = False)
 		; Invoke a save
 		Send($gCmdSave)
 		Local $hWnd1 = WinWaitActive($gSnipDialog2_title)
-		ConsoleWrite("hWnd1=" & $hWnd1 & $gPaintDialog2_title & @CRLF)
-		
+		ConsoleWrite("hWnd1=" & $hWnd1 & $gSnipDialog2_title & @CRLF)
+
 		; Set the path
 		ControlFocus($gSnipDialog2_title, "", $gSnipDialog2_cntrl_Path)
 		ControlSend ($gSnipDialog2_title, "", $gSnipDialog2_cntrl_Path,     $aPath)

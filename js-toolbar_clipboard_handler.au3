@@ -32,6 +32,7 @@ ConsoleWrite("WindowsDir     =" & @WindowsDir      & @CRLF)
 ConsoleWrite("SystemDir      =" & @SystemDir       & @CRLF)
 ConsoleWrite("ProgramFilesDir=" & @ProgramFilesDir & @CRLF)
 
+Local $junk        = 0
 Local $iOffset     = 100
 Local $iWidth      = ($gBtnWidth * 15) + ($gBtnWidth * 4) + 2
 Local $iTop        = 80
@@ -40,6 +41,7 @@ Local $dirSystem32 = @SystemDir & "\"
 Local $dirScript   = @ScriptDir & "\"
 Local $dirIco      = $dirScript & "ico\"
 Local $dirDest     = "C:\MyTemp\PaintMgr"
+ConsoleWrite("dirIco         =" & $dirIco      & @CRLF)
 ConsoleWrite("dirDest        =" & $dirDest     & @CRLF)
 ConsoleWrite("dirSystem32    =" & $dirSystem32 & @CRLF)
 ConsoleWrite("dirScript      =" & $dirScript   & @CRLF)
@@ -49,41 +51,51 @@ Local $h_ToolBar = XSkinToolBarCreate("Float-ToolBar", $iLeft, $iTop, $iWidth)
 
 
 Local $TButton01 = XSkinToolBarButton("", $dirIco & "\one.ico")
+GUICtrlSetTip( -1, "Buffer Clear")
 
 Local $TButton02 = XSkinToolBarButton("", $dirIco & "\two.ico")
+GUICtrlSetTip( -1, "Buffer Check")
 
 Local $TButton03 = XSkinToolBarButton("", $dirIco & "\three.ico")
+GUICtrlSetTip( -1, "App Info")
 
 Local $TButton04 = XSkinToolBarButton("", $dirIco & "\four.ico")
+GUICtrlSetTip( -1, "Not Defined")
 
 Local $TButton05 = XSkinToolBarButton("", $dirIco & "\five.ico")
+GUICtrlSetTip( -1, "Prt Scr")
 
 Local $TButton06 = XSkinToolBarButton("", $dirIco & "\six.ico")
+GUICtrlSetTip( -1, "Alt Prt Scr")
+
 ; Seperator
 XSkinToolBarSeparator()
 GUICtrlSetTip( -1, "Drag Me")
 
 
-Local $TButton07 = XSkinToolBarButton("", $dirSystem32 & $gNotepadExecutable)
-
+Local $TButton07 = XSkinToolBarButton("", $dirSystem32 & $gNotepadStruct[$enAppExe][$enValue])
+GUICtrlSetTip( -1, "Open Notepad")
 Local $TButton08 = XSkinToolBarButton("", $dirIco & "\save.ico")
+GUICtrlSetTip( -1, "Save Buffer to Notepad")
 ; Seperator
 XSkinToolBarSeparator()
 GUICtrlSetTip( -1, "Drag Me")
 
 
-Local $TButton09 = XSkinToolBarButton("", $dirSystem32 & $gPaintExecutable)
-
+Local $TButton09 = XSkinToolBarButton("", $dirSystem32 & $gPaintStruct[$enAppExe][$enValue])
+GUICtrlSetTip( -1, "Open Paint")
 Local $TButton10 = XSkinToolBarButton("", $dirIco & "\save.ico")
+GUICtrlSetTip( -1, "Save Buffer to Paint")
 ; Seperator
 XSkinToolBarSeparator()
 GUICtrlSetTip( -1, "Drag Me")
 
 
 ; #3 - Using Icons from an ico file
-Local $TButton11 = XSkinToolBarButton("", $dirSystem32 & $gSnipExecutable)
-
+Local $TButton11 = XSkinToolBarButton("", $dirIco & "\snip.ico")
+GUICtrlSetTip( -1, "Open Snip")
 Local $TButton12 = XSkinToolBarButton("", $dirIco & "\save.ico")
+GUICtrlSetTip( -1, "Save Buffer to Snip")
 ; Seperator
 XSkinToolBarSeparator()
 GUICtrlSetTip( -1, "Drag Me")
@@ -91,10 +103,13 @@ GUICtrlSetTip( -1, "Drag Me")
 
 ; Exit Button
 Local $TButton13   = XSkinToolBarButton("", $dirIco & "\configure.ico")
+GUICtrlSetTip( -1, "Save Window Positions")
 
 Local $TButton14   = XSkinToolBarButton("", $dirIco & "\sync.ico")
+GUICtrlSetTip( -1, "Reset Windows")
 
-Local $TButtonLast = XSkinToolBarButton("", $dirIco & "\stop.ico") ; 27, exit
+Local $TButtonLast = XSkinToolBarButton("", $dirIco & "\stop.ico")
+GUICtrlSetTip( -1, "Exit Toolbar")
 
 GUISetState(@SW_SHOW, $h_ToolBar)
 
@@ -108,39 +123,39 @@ While 1
     ElseIf $msg = $TButton02 Then
 		buffer_check()
     ElseIf $msg = $TButton03 Then
-		buffer_print_screen()
+		appinfo_dump_info("BTN7", $gNotepadStruct)
+		appinfo_dump_info("BTN7", $gPaintStruct)
+		appinfo_dump_info("BTN7", $gSnipStruct)
     ElseIf $msg = $TButton04 Then
 		buffer_alt_print_screen()
     ElseIf $msg = $TButton05 Then
-		buffer_alt_print_screen()
+		buffer_print_screen()
     ElseIf $msg = $TButton06 Then
 		buffer_alt_print_screen()
 
 	Elseif $msg = $TButton07 Then
-		Run($gNotepadExecutable)
+		appinfo_save_info($gNotepadStruct)
     ElseIf $msg = $TButton08 Then
 		buffer_check()
 
 	ElseIf $msg = $TButton09 Then
-		Run($gPaintExecutable)
+		appinfo_save_info($gPaintStruct)
 	ElseIf $msg = $TButton10 Then
 		ConsoleWrite(buffer_to_mspaint_and_save($dirDest) & ";Button10" & @CRLF)
 
 	ElseIf $msg = $TButton11 Then
-		_WinAPI_Wow64EnableWow64FsRedirection(False)
-		Run($gSnipExecutable)
-		_WinAPI_Wow64EnableWow64FsRedirection(True)
+		appinfo_save_info($gSnipStruct)
     ElseIf $msg = $TButton12 Then
 		ConsoleWrite(buffer_to_snip_and_save($dirDest) & ":Button13" & @CRLF)
 
-    ElseIf $msg = $TButton13 Then
-		appinfo_save_pos($gNotepadDialog1_class, $gNotepadX, $gNotepadY, $gNotepadW, $gNotepadH) ; Five, Position
-		appinfo_save_pos($gPaintDialog1_class,   $gPaintX,   $gPaintY,   $gPaintW,   $gPaintH) ; Seven, Position
-		appinfo_save_pos($gSnipDialog1_class,    $gSnipX,    $gSnipY,    $gSnipW,    $gSnipH) ; Seven, Position
+	ElseIf $msg = $TButton13 Then
+		appinfo_save_info($gPaintStruct)
+		appinfo_save_info($gNotepadStruct)
+		appinfo_save_info($gSnipStruct)
 	ElseIf $msg = $TButton14 Then
-		appinfo_reset_pos($gNotepadDialog1_class, $gNotepadDialog1_title, $gNotepadX, $gNotepadY, $gNotepadW, $gNotepadH) ; Reset
-		appinfo_reset_pos($gPaintDialog1_class,   $gPaintDialog1_title,   $gPaintX,   $gPaintY,   $gPaintW,   $gPaintH)   ; Reset
-		appinfo_reset_pos($gSnipDialog1_class,    $gSnipDialog1_title,    $gSnipX,    $gSnipY,    $gSnipW,    $gSnipH)    ; Reset
+		appinfo_reset_pos($gPaintStruct)
+		appinfo_reset_pos($gNotepadStruct)
+		appinfo_reset_pos($gSnipStruct)
     ElseIf $msg = $TButtonLast Then
 		Exit
 	EndIf
@@ -148,59 +163,21 @@ WEnd
 
 ; ************************ YOUR CODE ENDS HERE *****************************
 
-Func appinfo_reset_pos($aClass, $aTitle, $aX, $aY, $aW, $aH)
-	Local $bResult =  False
-	DumpWindowInfo("appinfo_reset_pos", $aClass, $aTitle, $aX, $aY, $aW, $aH)
-	
-	Local $hWnd1 = WinWait($aClass, "", 10)
-	If $hWnd1 <> 0 Then
-		ConsoleWrite("hWnd1=" & $hWnd1 & @CRLF)
-		Local $hWnd2 = WinMove($hWnd1, $aTitle, $aX, $aY, $aW, $ah)
-		ConsoleWrite("hWnd2=" & $hWnd2 & @CRLF)
-		If $hWnd2 <> 0 Then
-			$bResult = True
-		EndIf
-	EndIf
-	Return $bResult
-EndFunc
-
-Func appinfo_save_pos($aClass, ByRef $aX, ByRef $aY, ByRef $aW, ByRef $aH)
-	Local $bReturn = False
-
-	If is_app_running($aClass) == False Then
-		ConsoleWrite("Error, Class is not running:" & $aClass  & @CRLF)
-		$iReturn = 1;
-		return $iReturn
-	EndIf
-
-	; Retrieve the postion information for the window
-	Local $hWnd = WinWait($aClass, "", 10)
-	If $hWnd <> 0 Then
-		ConsoleWrite("hWnd=" & $hWnd & @CRLF)
-		Local $winPos = WinGetPos($hWnd)
-		If @error == 0 Then
-			; Save the result
-			$aX = $winPos[0]
-			$aY = $winPos[1]
-			$aW = $winPos[2]
-			$aH = $winPos[3]
-			DumpWindowInfo("appinfo_save_pos", $aClass, "", $aX, $aY, $aW, $aH)
-			$bReturn = True
-		EndIf
-	EndIf
-
-	Return $bReturn
-EndFunc
-
-Func DumpWindowInfo($aHeader, $aClass, $aTitle, $aX, $aY, $aW, $aH)
-	ConsoleWrite($aHeader & ":" & @CRLF)
-	ConsoleWrite("Class=" & $aClass & @CRLF)
-	ConsoleWrite("Title=" & $aTitle & @CRLF)
-	ConsoleWrite("X=" & $aX & @CRLF)
-	ConsoleWrite("Y=" & $aY & @CRLF)
-	ConsoleWrite("W=" & $aW & @CRLF)
-	ConsoleWrite("H=" & $aH & @CRLF)
-EndFunc
+;Func appinfo_reset_pos($aPid, $aClass, $aTitle, $aX, $aY, $aW, $aH)
+;	Local $bResult =  False
+;	;DumpWindowInfo("appinfo_reset_pos", $aClass, $aTitle, $aX, $aY, $aW, $aH)
+;	
+;	Local $hWnd1 = WinWait($aClass, "", 10)
+;	If $hWnd1 <> 0 Then
+;		ConsoleWrite("hWnd1=" & $hWnd1 & @CRLF)
+;		Local $hWnd2 = WinMove($hWnd1, $aTitle, $aX, $aY, $aW, $ah)
+;		ConsoleWrite("hWnd2=" & $hWnd2 & @CRLF)
+;		If $hWnd2 <> 0 Then
+;			$bResult = True
+;		EndIf
+;	EndIf
+;	Return $bResult
+;EndFunc
 
 Func buffer_to_snip_and_save($aDestDir)
 	Local $funcName = "buffer_to_snip_and_save"
@@ -226,7 +203,7 @@ Func buffer_to_snip_and_save($aDestDir)
 	EndIf
 
 	; Is mspaint is running?
-	Local $status = is_app_running($gSnipDialog1_title)
+	Local $status = is_app_running($gSnipStruct[$enAppTitle][$enValue])
 	ConsoleWrite("is_app_running=" & $status & @CRLF)
 	If $status == False Then
 		ConsoleWrite("Error, Snip is not running"  & @CRLF)
@@ -235,7 +212,7 @@ Func buffer_to_snip_and_save($aDestDir)
 	EndIf
 
 	; Yes, Focus to mspaint
-	If set_app_focuse($gSnipDialog1_title) == False Then
+	If set_app_focuse($gSnipStruct[$enAppTitle][$enValue]) == False Then
 		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
 		$iReturn = 3;
 		return $iReturn
@@ -276,7 +253,7 @@ Func buffer_to_mspaint_and_save($aDestDir)
 	EndIf
 
 	; Is mspaint is running?
-	Local $status = is_app_running($gPaintDialog1_class)
+	Local $status = is_app_running($gSnipStruct[$enAppClass][$enValue])
 	ConsoleWrite("is_app_running=" & $status & @CRLF)
 	If $status == False Then
 		ConsoleWrite("Error, Paint is not running"  & @CRLF)
@@ -285,7 +262,7 @@ Func buffer_to_mspaint_and_save($aDestDir)
 	EndIf
 
 	; Yes, Focus to mspaint
-	If set_app_focuse($gPaintDialog1_class) == False Then
+	If set_app_focuse($gSnipStruct[$enAppClass][$enValue]) == False Then
 		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
 		$iReturn = 4;
 		return $iReturn

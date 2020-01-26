@@ -1,14 +1,17 @@
 ; Caller shall include "lib_Intf.aue" before including this file
 ; Snip Information
-Global $gNotepadExecutable         = "notepad.exe"
-
-; Dialog 1
-Global $gNotepadDialog1_class      = "[CLASS:Notepad]"
-Global $gNotepadDialog1_title      = "Untitled - Notepad"
-Global $gNotepadX                  = -1
-Global $gNotepadY                  = -1
-Global $gNotepadW                  = -1
-Global $gNotepadH                  = -1
+Global $gNotepadStruct[10][2] = [ _
+    ["Exe  ", "notepad.exe"],        _
+	["Redir", False],                _
+	["Class", "[CLASS:Notepad]"],    _
+	["Title", "Untitled - Notepad"], _
+	["Pid  ", -1], _
+	["hWnd ", -1], _
+	["X    ", -1], _
+	["Y    ", -1], _
+	["W    ", -1], _
+	["H    ", -1]  _
+   ]
 
 ; Dialog 2
 Global $gNotepadDialog2_title      = "Save As"
@@ -51,15 +54,15 @@ Func copy_buffer_to_notepad($aPath, $aFilename, $aSaveFlag = False)
 	If $aSaveFlag == True Then
 		; Invoke a save
 		Send($gCmdSave)
-		WinWaitActive($gSnipDialog2_title)
+		WinWaitActive($gNotepadDialog2_title)
 
 		; Set the path
-		ControlFocus($gSnipDialog2_title, "", $gSnipDialog2_cntrl_Path)
-		ControlSend ($gSnipDialog2_title, "", $gSnipDialog2_cntrl_Path,     $aPath)
+		ControlFocus($gNotepadDialog2_title, "", $gNotepadDialog2_cntrl_Path)
+		ControlSend ($gNotepadDialog2_title, "", $gNotepadDialog2_cntrl_Path,     $aPath)
 
 		; Set the filename
-		ControlFocus($gSnipDialog2_title, "", $gSnipDialog2_cntrl_File)
-		ControlSend ($gSnipDialog2_title, "", $gSnipDialog2_cntrl_File, $aFilename)
+		ControlFocus($gNotepadDialog2_title, "", $gNotepadDialog2_cntrl_File)
+		ControlSend ($gNotepadDialog2_title, "", $gNotepadDialog2_cntrl_File, $aFilename)
 
 	EndIf
 EndFunc

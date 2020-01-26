@@ -1,15 +1,19 @@
 ; Caller shall include "lib_Intf.aue" before including this file
+
+Global $gPaintStruct[10][2] = [ _
+    ["Exe  ", "mspaint.exe"],        _
+	["Redir", False],                _
+	["Class", "[CLASS:MSPaintApp]"], _
+	["Title", "Untitled - Paint"],   _
+	["Pid  ", -1], _
+	["hWnd ", -1], _
+	["X    ", -1], _
+	["Y    ", -1], _
+	["W    ", -1], _
+	["H    ", -1]  _
+   ]
 ; Snip Information
-Global $gPaintExecutable    = "mspaint.exe"
 
-; Dialog 1
-Global $gPaintDialog1_class = "[CLASS:MSPaintApp]"
-
-Global $gPaintDialog1_title = "Untitled - Paint"
-Global $gPaintX             = -1
-Global $gPaintY             = -1
-Global $gPaintW             = -1
-Global $gPaintH             = -1
 
 ; Dialog 2
 Global $gPaintDialog2_title      = "Save As"
