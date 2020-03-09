@@ -1,11 +1,12 @@
 ; Caller shall include "lib_Intf.au3" before including this file.
 ; Caller shall include "lib_cmds.au3" before including this file.
-; Snip Information
-Global $gSnipStruct[10][2] = [ _
-    ["Exe  ", "snippingtool.exe"],        _
-	["Redir", True],                _
+
+; Snip App Information
+Global $gSnipStruct[10][2] = [     _
+    ["Exe  ", "snippingtool.exe"], _
+	["Redir", True],               _
 	["Class", "[CLASS:Microsoft-Windows-SnipperToolbar]"], _
-	["Title", "Snipping Tool"],   _
+	["Title", "Snipping Tool"],    _
 	["Pid  ", -1], _
 	["hWnd ", -1], _
 	["X    ", -1], _
@@ -14,42 +15,10 @@ Global $gSnipStruct[10][2] = [ _
 	["H    ", -1]  _
    ]
 
-
 ; Dialog 2
 Global $gSnipDialog2_title      = "Save As"
 Global $gSnipDialog2_cntrl_Path = "ToolbarWindow324"
 Global $gSnipDialog2_cntrl_File = "Edit1"
-
-Func snip_init($aPrefix, $aPath, ByRef $aFilename)
-	Local $funcName = "snip_init"
-	ConsoleWrite("+++++ " & $funcName & @CRLF)
-	Local $bReturn = False
-
-	; filename, part 1
-	Local $timeStamp   = get_timestamp()
-	; filename, part 3
-	Local $fileSuffix  = "_func.png"
-
-	ConsoleWrite("aPath     ;" & $aPath      & @CRLF)
-	ConsoleWrite("timestamp ;" & $timeStamp  & @CRLF)
-	ConsoleWrite("aPrefix   ;" & $aPrefix    & @CRLF)
-	ConsoleWrite("fileSuffix;" & $fileSuffix & @CRLF)
-
-	; filename
-	$aFilename = $timeStamp & "-" & $aPrefix & $fileSuffix
-	ConsoleWrite("aFilename ; " & $aFilename & @CRLF)
-
-	; filepath
-	if dir_exists($aPath) == True Then
-		$bReturn = True;
-		ConsoleWrite("path      ;" & $aPath & ";" & dir_exists($aPath) & @CRLF)
-	Else
-		ConsoleWrite("Error, aPath does not exists: " & $aPath)
-	EndIf
-
-	ConsoleWrite("----- " & $funcName & @CRLF)
-	Return $bReturn
-EndFunc
 
 Func copy_buffer_to_snip($aPath, $aFilename, $aSaveFlag = False)
 	; Insert Image from buffer no required
@@ -76,4 +45,54 @@ Func copy_buffer_to_snip($aPath, $aFilename, $aSaveFlag = False)
 
 	EndIf
 	ConsoleWrite("----- " & $funcName & @CRLF)
+EndFunc
+
+Func buffer_to_snip_and_save($aDestDir)
+	Local $iReturn  = 0;
+	Local $funcName = "buffer_to_snip_and_save"
+	ConsoleWrite("+++++" & $funcName & @CRLF)
+
+	; This toolbar has the focus
+	Local $fileName = ""
+	ConsoleWrite("aDestDir=" & $aDestDir & @CRLF)
+
+
+	; Is an image present in the clipboard?
+	If is_clip_image() == False Then
+		ConsoleWrite("Error, No image on clipboard" & @CRLF)
+		$iReturn = 1;
+		return $iReturn
+	EndIf
+
+	; Yes, initialize to get a filename with a unique timestamp
+	If get_save_filename("SNIP", $aDestDir, $fileName) == False Then
+		ConsoleWrite("Error, Unable to build filename" & @CRLF)
+		$iReturn = 1;
+		return $iReturn
+	EndIf
+
+	; Is mspaint is running?
+	Local $status = is_app_running($gSnipStruct[$enAppTitle][$enValue])
+	ConsoleWrite("is_app_running=" & $status & @CRLF)
+	If $status == False Then
+		ConsoleWrite("Error, Snip is not running"  & @CRLF)
+		$iReturn = 2;
+		return $iReturn
+	EndIf
+
+	; Yes, Focus to mspaint
+	If set_app_focuse($gSnipStruct[$enAppTitle][$enValue]) == False Then
+		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
+		$iReturn = 3;
+		return $iReturn
+	EndIf
+
+	; Main function
+	If copy_buffer_to_snip($aDestDir, $fileName, True) == False Then
+		$iReturn = 4;
+		return $iReturn
+	EndIf
+
+	ConsoleWrite("----- " & $funcName & " " & $iReturn & @CRLF)
+	return $iReturn
 EndFunc

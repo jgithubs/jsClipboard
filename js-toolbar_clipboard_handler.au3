@@ -22,7 +22,7 @@ Global $TBcnt = -1
 ; ************************ YOUR CODE GOES BELOW HERE *****************************
 
 ; 1920 x 1200
-Global $gBtnWidth  = 60          ; 24
+Global $gBtnWidth  = 44          ; 24
 Global $gBtnHeight = $gBtnWidth  ; Square
 
 ConsoleWrite("Width          =" & @DesktopWidth    & @CRLF)
@@ -115,6 +115,8 @@ GUISetState(@SW_SHOW, $h_ToolBar)
 
 WinSetOnTop($h_ToolBar, "", 1)
 
+Local $status = 0
+
 While 1
     $msg = GUIGetMsg()
 
@@ -134,27 +136,27 @@ While 1
 		buffer_alt_print_screen()
 
 	Elseif $msg = $TButton07 Then
-		appinfo_save_info($gNotepadStruct)
+		appinfo_save_info($gNotepadStruct, $status, True)
     ElseIf $msg = $TButton08 Then
 		buffer_check()
 
 	ElseIf $msg = $TButton09 Then
-		appinfo_save_info($gPaintStruct)
+		appinfo_save_info($gPaintStruct, $status, True)
 	ElseIf $msg = $TButton10 Then
 		ConsoleWrite(buffer_to_mspaint_and_save($dirDest) & ";Button10" & @CRLF)
 
 	ElseIf $msg = $TButton11 Then
-		appinfo_save_info($gSnipStruct)
+		appinfo_save_info($gSnipStruct, $status, True)
     ElseIf $msg = $TButton12 Then
 		ConsoleWrite(buffer_to_snip_and_save($dirDest) & ":Button13" & @CRLF)
 
 	ElseIf $msg = $TButton13 Then
-		appinfo_save_info($gPaintStruct)
-		appinfo_save_info($gNotepadStruct)
-		appinfo_save_info($gSnipStruct)
+		;appinfo_save_info($gPaintStruct)
+		;appinfo_save_info($gNotepadStruct)
+		appinfo_save_info($gSnipStruct, $status)
 	ElseIf $msg = $TButton14 Then
-		appinfo_reset_pos($gPaintStruct)
-		appinfo_reset_pos($gNotepadStruct)
+		;appinfo_reset_pos($gPaintStruct)
+		;appinfo_reset_pos($gNotepadStruct)
 		appinfo_reset_pos($gSnipStruct)
     ElseIf $msg = $TButtonLast Then
 		Exit
@@ -162,123 +164,6 @@ While 1
 WEnd
 
 ; ************************ YOUR CODE ENDS HERE *****************************
-
-;Func appinfo_reset_pos($aPid, $aClass, $aTitle, $aX, $aY, $aW, $aH)
-;	Local $bResult =  False
-;	;DumpWindowInfo("appinfo_reset_pos", $aClass, $aTitle, $aX, $aY, $aW, $aH)
-;	
-;	Local $hWnd1 = WinWait($aClass, "", 10)
-;	If $hWnd1 <> 0 Then
-;		ConsoleWrite("hWnd1=" & $hWnd1 & @CRLF)
-;		Local $hWnd2 = WinMove($hWnd1, $aTitle, $aX, $aY, $aW, $ah)
-;		ConsoleWrite("hWnd2=" & $hWnd2 & @CRLF)
-;		If $hWnd2 <> 0 Then
-;			$bResult = True
-;		EndIf
-;	EndIf
-;	Return $bResult
-;EndFunc
-
-Func buffer_to_snip_and_save($aDestDir)
-	Local $funcName = "buffer_to_snip_and_save"
-	ConsoleWrite("+++++" & $funcName & @CRLF)
-	Local $iReturn = 0;
-	; This toolbar has the focus
-	Local $fileName = ""
-	ConsoleWrite("aDestDir=" & $aDestDir & @CRLF)
-
-
-	; Is an image present in the clipboard?
-	If is_clip_image() == False Then
-		ConsoleWrite("Error, No image on clipboard" & @CRLF)
-		$iReturn = 1;
-		return $iReturn
-	EndIf
-
-	; Yes, initialize to get a filename with a unique timestamp
-	If snip_init("SNIP", $aDestDir, $fileName) == False Then
-		ConsoleWrite("Error, Unable to build filename" & @CRLF)
-		$iReturn = 1;
-		return $iReturn
-	EndIf
-
-	; Is mspaint is running?
-	Local $status = is_app_running($gSnipStruct[$enAppTitle][$enValue])
-	ConsoleWrite("is_app_running=" & $status & @CRLF)
-	If $status == False Then
-		ConsoleWrite("Error, Snip is not running"  & @CRLF)
-		$iReturn = 2;
-		return $iReturn
-	EndIf
-
-	; Yes, Focus to mspaint
-	If set_app_focuse($gSnipStruct[$enAppTitle][$enValue]) == False Then
-		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
-		$iReturn = 3;
-		return $iReturn
-	EndIf
-
-	; Main function
-	If copy_buffer_to_snip($aDestDir, $fileName, True) == False Then
-		$iReturn = 4;
-		return $iReturn
-	EndIf
-
-	ConsoleWrite("----- " & $funcName & @CRLF)
-	return $iReturn
-EndFunc
-
-;---------------
-
-Func buffer_to_mspaint_and_save($aDestDir)
-	Local $funcName = "buffer_to_mspaint_and_save"
-	ConsoleWrite("+++++ " & $funcName & @CRLF)
-	Local $iReturn = 0;
-	; This toolbar has the focus
-	Local $fileName = ""
-
-
-	; Is an image present in the clipboard?
-	If is_clip_image() == False Then
-		ConsoleWrite("Error, No image on clipboard" & @CRLF)
-		$iReturn = 1;
-		return $iReturn
-	EndIf
-
-	; Yes, initialize to get a filename with a unique timestamp
-	If paint_init("PAINT", $aDestDir, $fileName) == False Then
-		ConsoleWrite("Error, Unable to build filename" & @CRLF)
-		$iReturn = 2;
-		return $iReturn
-	EndIf
-
-	; Is mspaint is running?
-	Local $status = is_app_running($gSnipStruct[$enAppClass][$enValue])
-	ConsoleWrite("is_app_running=" & $status & @CRLF)
-	If $status == False Then
-		ConsoleWrite("Error, Paint is not running"  & @CRLF)
-		$iReturn = 3;
-		return $iReturn
-	EndIf
-
-	; Yes, Focus to mspaint
-	If set_app_focuse($gSnipStruct[$enAppClass][$enValue]) == False Then
-		ConsoleWrite("Error, Unable to focus on mspaint" & @CRLF)
-		$iReturn = 4;
-		return $iReturn
-	EndIf
-
-	; Main function
-	If copy_buffer_to_paint($aDestDir, $fileName, True) == False Then
-		$iReturn = 5;
-		return $iReturn
-	EndIf
-
-	ConsoleWrite("-----" & $funcName & ";" & $iReturn & @CRLF)
-	return $iReturn
-EndFunc
-
-; ------------
 
 Func buffer_check()
 	Local $bReturn = False
@@ -386,17 +271,6 @@ Func XSkinToolBarButton($iNumber, $aDllExeIco = "shell32.dll")
     Local $TBBleft  = $TBcnt * $gBtnWidth
     Local $Xhadd    = GUICtrlCreateButton("", $TBBleft, 1, $gBtnWidth, $gBtnHeight, $BS_ICON)
     GUICtrlSetImage($Xhadd, $aDllExeIco, $iNumber, $iconSize)
-    Return $Xhadd
-EndFunc   ;==>XSkinToolBarButton
-
-Func XSkinToolBarButton2($iNumber, $aDllExeIco = "shell32.dll")
-    $TBcnt          = $TBcnt + 1
-	Local $iconSize = 1 ; 0=small, 1=normal
-    Local $TBBleft  = $TBcnt * $gBtnWidth
-	_WinAPI_Wow64EnableWow64FsRedirection(False)
-    Local $Xhadd    = GUICtrlCreateButton("", $TBBleft, 1, $gBtnWidth, $gBtnHeight, $BS_ICON)
-    GUICtrlSetImage($Xhadd, $aDllExeIco, $iNumber, $iconSize)
-	_WinAPI_Wow64EnableWow64FsRedirection(True)
     Return $Xhadd
 EndFunc   ;==>XSkinToolBarButton
 

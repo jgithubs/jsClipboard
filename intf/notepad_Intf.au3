@@ -1,5 +1,5 @@
 ; Caller shall include "lib_Intf.aue" before including this file
-; Snip Information
+; Notepad App Information
 Global $gNotepadStruct[10][2] = [ _
     ["Exe  ", "notepad.exe"],        _
 	["Redir", False],                _
